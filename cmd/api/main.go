@@ -12,6 +12,9 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 
 	"github.com/AugustoGuapo/concretrack-backoffice-be/internal/application"
+	"github.com/AugustoGuapo/concretrack-backoffice-be/internal/domain/client"
+	"github.com/AugustoGuapo/concretrack-backoffice-be/internal/domain/family"
+	"github.com/AugustoGuapo/concretrack-backoffice-be/internal/domain/member"
 	"github.com/AugustoGuapo/concretrack-backoffice-be/internal/domain/project"
 	"github.com/AugustoGuapo/concretrack-backoffice-be/internal/domain/user"
 	"github.com/AugustoGuapo/concretrack-backoffice-be/internal/infra/http/handler"
@@ -47,6 +50,18 @@ func main() {
 
     reportsService := application.NewReportsService(projectRepo)
     reportsHandler := handler.NewReportsHandler(*reportsService)
+
+    clientRepo := storage.NewClientRepository(db)
+    clientService := client.NewClientService(clientRepo)
+    clientHandler := handler.NewClientHandler(clientService)
+
+    familyRepo := storage.NewFamilyRepository(db)
+    familyService := family.NewFamilyService(familyRepo)
+    familyHandler := handler.NewFamilyHandler(familyService)
+
+    memberRepo := storage.NewMemberRepository(db)
+    memberService := member.NewMemberService(memberRepo)
+    memberHandler := handler.NewMemberHandler(memberService)
 
     // --- Router Chi ---
     r := chi.NewRouter()
@@ -96,11 +111,44 @@ func main() {
 		})
 
         r.Get("/{ID}/families/{familyID}/report", func(w http.ResponseWriter, r *http.Request) {
-
-
             reportsHandler.GenerateReportForOneFamily(w, r)
         })
+
+        r.Post("/", func(w http.ResponseWriter, r *http.Request) {
+            projectHandler.SaveProject(w, r)
+        })
     })
+
+    r.Route("/clients", func(r chi.Router) {
+        r.Get("/{ID}", func(w http.ResponseWriter, r *http.Request) {
+            clientHandler.GetClient(w, r)
+        })
+
+        r.Get("/", func(w http.ResponseWriter, r *http.Request) {
+            clientHandler.GetAllClients(w, r)
+        })
+
+        r.Post("/", func(w http.ResponseWriter, r *http.Request) {
+            clientHandler.SaveClient(w, r)
+        })
+
+        r.Get("/{clientID}/projects", func(w http.ResponseWriter, r *http.Request) {
+            projectHandler.GetProjectsByClientID(w, r)
+        })
+    })
+
+    r.Route("/families", func(r chi.Router) {
+        r.Post("/", func(w http.ResponseWriter, r *http.Request) {
+            familyHandler.SaveFamily(w, r)
+        })
+    })
+
+    r.Route("/members", func(r chi.Router) {
+        r.Post("/", func(w http.ResponseWriter, r *http.Request) {
+            memberHandler.SaveMembers(w, r)
+        })
+    })
+    
 
     // --- Inicio del servidor ---
     log.Println("Servidor corriendo en http://localhost:8080")

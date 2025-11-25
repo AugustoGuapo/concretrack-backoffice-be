@@ -8,11 +8,12 @@ import (
 
 type Member struct {
     ID             int       `db:"id" json:"id"`
-	FamilyID int `db:"family_id" json:"-"`
+	FamilyID int `db:"family_id" json:"family_id"`
     Result         *int       `db:"result" json:"result"`
-    DateOfFracture *time.Time `db:"date_of_fracture" json:"dateOfFracture"`
-    FracturedAt     *time.Time `db:"fractured_at" json:"fracturedAt"`
+    DateOfFracture *time.Time `db:"date_of_fracture" json:"date_of_fracture"`
+    FracturedAt     *time.Time `db:"fractured_at" json:"fractured_at"`
     Operative      *user.User `db:"-" json:"operative"`
-    IsReported     *bool      `db:"is_reported" json:"isReported"`
+    IsReported     *bool      `db:"is_reported" json:"is_reported"`
+    FractureDays *int `db:"fracture_days" json:"fracture_days"`
     OperativeID *int `db:"operative" json:"-"`
 }

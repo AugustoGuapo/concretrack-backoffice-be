@@ -320,3 +320,171 @@ func (p *projectRepository) GetProjects(page int) ([]*project.Project, error) {
     return out, nil
 }
 
+func (r *projectRepository) SaveProject(p *project.Project) (*project.Project, error) {
+    result, err := r.db.Exec(`
+        INSERT INTO projects (name, client_id)
+        VALUES (?, ?)
+    `, p.Name, p.ClientID)
+    log.Printf("%+v", p)
+
+    if err != nil {
+        return nil, err
+    }
+
+    id, err := result.LastInsertId()
+    log.Print(id)
+    if err != nil {
+        return nil, err
+    }
+
+    created, err := r.GetProjectByID(int(id))
+
+    if err != nil {
+        return nil, err
+    }
+
+    return created, nil
+}
+
+func (p *projectRepository) GetProjectsByClientID(clientID int) ([]*project.Project, error) {
+    log.Printf("[GetProjectsByClientID] Starting. clientID=%d", clientID)
+
+    if clientID < 1 {
+        log.Printf("[GetProjectsByClientID] Invalid clientID=%d", clientID)
+        return nil, errors.New("clientID must be greater than zero")
+    }
+
+    // ---------------------------
+    // 1. Proyectos base
+    // ---------------------------
+    var projects []project.Project
+    err := p.db.Select(&projects, `
+        SELECT id, name, client_id
+        FROM projects
+        WHERE client_id = ?
+        ORDER BY id`, clientID)
+
+    if err != nil {
+        log.Printf("[GetProjectsByClientID] Failed loading projects. err=%v", err)
+        return nil, err
+    }
+
+    log.Printf("[GetProjectsByClientID] Projects found=%d", len(projects))
+
+    if len(projects) == 0 {
+        return []*project.Project{}, nil
+    }
+
+    projMap := make(map[int]*project.Project)
+    projectIDs := make([]int, 0, len(projects))
+
+    for i := range projects {
+        proj := &projects[i]
+        projMap[proj.ID] = proj
+        projectIDs = append(projectIDs, proj.ID)
+    }
+
+    // ---------------------------
+    // 2. Cargar el cliente
+    // ---------------------------
+    var cli client.Client
+    err = p.db.Get(&cli, `SELECT id, name FROM clients WHERE id = ?`, clientID)
+    if err != nil {
+        log.Printf("[GetProjectsByClientID] Failed loading client. err=%v", err)
+        return nil, err
+    }
+
+    // Asignar cliente a cada proyecto
+    for _, p := range projMap {
+        p.Client = cli
+    }
+
+    // ---------------------------
+    // 3. Familias
+    // ---------------------------
+    query, args, err := sqlx.In(`
+        SELECT id, type, date_of_entry, radius, height, classification, client_id, project_id, sample_place
+        FROM families
+        WHERE project_id IN (?)`, projectIDs)
+    if err != nil {
+        log.Printf("[GetProjectsByClientID] sqlx.In error families. err=%v", err)
+        return nil, err
+    }
+
+    query = p.db.Rebind(query)
+
+    var families []family.Family
+    if err := p.db.Select(&families, query, args...); err != nil {
+        log.Printf("[GetProjectsByClientID] Failed loading families. err=%v", err)
+        return nil, err
+    }
+
+    log.Printf("[GetProjectsByClientID] Families found=%d", len(families))
+
+    famMap := make(map[int]*family.Family)
+    familyIDs := make([]int, 0, len(families))
+
+    for i := range families {
+        f := &families[i]
+        famMap[f.ID] = f
+        familyIDs = append(familyIDs, f.ID)
+
+        projMap[f.ProjectID].Families = append(projMap[f.ProjectID].Families, *f)
+    }
+
+    if len(families) == 0 {
+        // No hay familias → retornar proyectos tal cual
+        out := make([]*project.Project, 0, len(projects))
+        for i := range projects {
+            out = append(out, &projects[i])
+        }
+        return out, nil
+    }
+
+    // ---------------------------
+    // 4. Miembros
+    // ---------------------------
+    query, args, err = sqlx.In(`
+        SELECT id, family_id, result, date_of_fracture, is_reported
+        FROM members
+        WHERE family_id IN (?)`, familyIDs)
+    if err != nil {
+        log.Printf("[GetProjectsByClientID] sqlx.In error members. err=%v", err)
+        return nil, err
+    }
+
+    query = p.db.Rebind(query)
+
+    var members []member.Member
+    if err := p.db.Select(&members, query, args...); err != nil {
+        log.Printf("[GetProjectsByClientID] Failed loading members. err=%v", err)
+        return nil, err
+    }
+
+    log.Printf("[GetProjectsByClientID] Members found=%d", len(members))
+
+    for _, m := range members {
+        famMap[m.FamilyID].Members = append(famMap[m.FamilyID].Members, m)
+    }
+
+    // Reconstruir estructuras anidadas
+    for projID := range projMap {
+        for i := range projMap[projID].Families {
+            famID := projMap[projID].Families[i].ID
+            projMap[projID].Families[i] = *famMap[famID]
+        }
+    }
+
+    // ---------------------------
+    // Final
+    // ---------------------------
+    out := make([]*project.Project, 0, len(projects))
+    for i := range projects {
+        out = append(out, &projects[i])
+    }
+
+    log.Printf("[GetProjectsByClientID] Returning %d projects", len(out))
+    return out, nil
+}
+
+
