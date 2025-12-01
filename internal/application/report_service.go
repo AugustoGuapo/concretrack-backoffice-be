@@ -276,7 +276,7 @@ func (r *ReportsService) generateReportData(project *project.Project, family *fa
 				DesignMPA:        fmt.Sprintf("%.2f", family.DesignResistance / 145.0377),
 				DesignPSI:        fmt.Sprintf("%.2f", family.DesignResistance),
 				ObtainedPercent:  fmt.Sprintf("%.2f", (StrengthPSI / family.DesignResistance) * 100),
-				FailureShape:     v.FractureType,
+				FailureShape:     *v.FractureType,
 				ID:               v.ID,
 				FracturedAt:      v.FracturedAt.Local().Format("2006-01-02"),
 				Result:           *v.Result,
