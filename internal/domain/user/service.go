@@ -33,4 +33,4 @@ func (s *Service) Login(username string, password string) (User, error) {
 	}
 
 	return *u, nil
-} 
+}

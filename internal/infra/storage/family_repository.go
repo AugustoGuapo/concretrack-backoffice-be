@@ -23,9 +23,10 @@ func (r *familyRepository) SaveFamily(family *family.Family) (*family.Family, er
 			classification,
 			client_id,
 			project_id,
-			sample_place
+			sample_place,
+			design_resistance
 		)
-		VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
 	`
 
 	res, err := r.db.Exec(
@@ -38,6 +39,7 @@ func (r *familyRepository) SaveFamily(family *family.Family) (*family.Family, er
 		family.ClientID,
 		family.ProjectID,
 		family.SamplePlace,
+		family.DesignResistance,
 	)
 	if err != nil {
 		return nil, err

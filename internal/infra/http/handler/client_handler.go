@@ -31,7 +31,7 @@ func (h *ClientHandler) GetClient(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-    json.NewEncoder(w).Encode(client)
+	json.NewEncoder(w).Encode(client)
 }
 
 func (h *ClientHandler) GetAllClients(w http.ResponseWriter, r *http.Request) {
@@ -44,7 +44,7 @@ func (h *ClientHandler) GetAllClients(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-    json.NewEncoder(w).Encode(clients)
+	json.NewEncoder(w).Encode(clients)
 }
 
 func (h *ClientHandler) SaveClient(w http.ResponseWriter, r *http.Request) {
@@ -62,5 +62,5 @@ func (h *ClientHandler) SaveClient(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-    json.NewEncoder(w).Encode(createdClient)
+	json.NewEncoder(w).Encode(createdClient)
 }

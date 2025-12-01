@@ -7,9 +7,9 @@ import (
 )
 
 type Project struct {
-    ID       int             `db:"id" json:"id"`
-    Name     string          `db:"name" json:"name"`
-	ClientID int 			 `db:"client_id" json:"client_id"`
-    Client   client.Client   `db:"-" json:"client"`
-    Families []family.Family `db:"-" json:"families"`
+	ID       int             `db:"id" json:"id"`
+	Name     string          `db:"name" json:"name"`
+	ClientID int             `db:"client_id" json:"client_id"`
+	Client   client.Client   `db:"-" json:"client"`
+	Families []family.Family `db:"-" json:"families"`
 }

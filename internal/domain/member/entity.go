@@ -7,13 +7,14 @@ import (
 )
 
 type Member struct {
-    ID             int       `db:"id" json:"id"`
-	FamilyID int `db:"family_id" json:"family_id"`
-    Result         *int       `db:"result" json:"result"`
-    DateOfFracture *time.Time `db:"date_of_fracture" json:"date_of_fracture"`
-    FracturedAt     *time.Time `db:"fractured_at" json:"fractured_at"`
-    Operative      *user.User `db:"-" json:"operative"`
-    IsReported     *bool      `db:"is_reported" json:"is_reported"`
-    FractureDays *int `db:"fracture_days" json:"fracture_days"`
-    OperativeID *int `db:"operative" json:"-"`
+	ID             int        `db:"id" json:"id"`
+	FamilyID       int        `db:"family_id" json:"family_id"`
+	Result         *float64   `db:"result" json:"result"`
+	DateOfFracture *time.Time `db:"date_of_fracture" json:"date_of_fracture"`
+	FracturedAt    *time.Time `db:"fractured_at" json:"fractured_at"`
+	Operative      *user.User `db:"-" json:"operative"`
+	IsReported     *bool      `db:"is_reported" json:"is_reported"`
+	FractureDays   *int       `db:"fracture_days" json:"fracture_days"`
+	OperativeID    *int       `db:"operative" json:"-"`
+	FractureType   int        `db:"fracture_type" json:"fracture_type"`
 }

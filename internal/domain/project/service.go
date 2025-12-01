@@ -6,13 +6,13 @@ type Service struct {
 
 func NewService(r Repository) *Service {
 	return &Service{repo: r}
-} 
+}
 
-func (s *Service) GetProjectByID(ID int)(*Project, error) {
+func (s *Service) GetProjectByID(ID int) (*Project, error) {
 	return s.repo.GetProjectByID(ID)
 }
 
-func (s *Service) GetProjects(page int)([]*Project, error) {
+func (s *Service) GetProjects(page int) ([]*Project, error) {
 	return s.repo.GetProjects(page)
 }
 
