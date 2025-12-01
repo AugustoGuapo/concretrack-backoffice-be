@@ -59,7 +59,7 @@ type ReportMember struct {
 	DesignMPA        string
 	DesignPSI        string
 	ObtainedPercent  string
-	FailureShape     int
+	FailureShape     string
     Perpendicularity string
 }
 

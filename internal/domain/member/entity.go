@@ -16,5 +16,5 @@ type Member struct {
 	IsReported     *bool      `db:"is_reported" json:"is_reported"`
 	FractureDays   *int       `db:"fracture_days" json:"fracture_days"`
 	OperativeID    *int       `db:"operative" json:"-"`
-	FractureType   *int        `db:"fracture_type" json:"fracture_type"`
+	FractureType   *string    `db:"fracture_type" json:"fracture_type"`
 }
